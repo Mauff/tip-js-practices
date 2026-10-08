@@ -111,3 +111,76 @@ console.log("Исходный массив не изменился.");
 
 console.log("\nФинальные идентификаторы:", currentTasks.map(t => t.id));
 console.log("=== Демонстрация завершена ===");
+// ============================================================
+// Индивидуальный вариант №5
+// ============================================================
+console.log("\n\n=== Демонстрация индивидуального варианта №5 ===");
+console.log(`Номер варианта: ${variantNumber}`);
+console.log("Тема: Разработка командного прототипа");
+
+let variantCurrent = variantTasks;
+
+console.log("\n--- Исходные данные варианта ---");
+console.log(variantCurrent);
+printStats(variantCurrent, "Исходный вариант");
+
+// Шаг 2 из задания: добавить задачу id = 80
+console.log("\n--- Добавление задачи id=80 ---");
+const addVariant = addTask(variantCurrent, 80, "Собственное название задачи", "medium");
+if (addVariant.ok) {
+  variantCurrent = addVariant.tasks;
+  console.log("Успешно добавлено.");
+} else {
+  console.error("Ошибка:", addVariant.error);
+}
+printStats(variantCurrent, "После добавления id=80");
+
+// Шаг 3: completed = true для id = 11
+console.log("\n--- Установка completed=true для id=11 ---");
+const setVariant = setTaskCompleted(variantCurrent, 11, true);
+if (setVariant.ok) {
+  variantCurrent = setVariant.tasks;
+  console.log("Статус изменён.");
+} else {
+  console.error("Ошибка:", setVariant.error);
+}
+
+// Шаг 4: переименовать id = 23
+console.log("\n--- Переименование id=23 ---");
+const renameVariant = renameTask(variantCurrent, 23, "Новое название задачи");
+if (renameVariant.ok) {
+  variantCurrent = renameVariant.tasks;
+  console.log("Название изменено.");
+} else {
+  console.error("Ошибка:", renameVariant.error);
+}
+
+// Шаг 5: удалить id = 37
+console.log("\n--- Удаление id=37 ---");
+const removeVariant = removeTask(variantCurrent, 37);
+if (removeVariant.ok) {
+  variantCurrent = removeVariant.tasks;
+  console.log("Задача удалена.");
+} else {
+  console.error("Ошибка:", removeVariant.error);
+}
+
+// Шаг 6: повторно добавить id = 80 (отказ)
+console.log("\n--- Повторное добавление id=80 ---");
+const duplicateVariant = addTask(variantCurrent, 80, "Дубликат");
+if (!duplicateVariant.ok) {
+  console.log("Ожидаемая ошибка:", duplicateVariant.error);
+} else {
+  console.error("Этого не должно было произойти!");
+}
+
+// Шаг 7: зафиксировать итоги
+console.log("\n--- Итоговые задачи варианта ---");
+console.log(variantCurrent.map(t => `${t.id}: ${t.title} (${t.priority})`));
+printStats(variantCurrent, "Итоговый вариант");
+
+console.log("\nПроверка сохранности variantTasks:");
+console.log("Длина исходного variantTasks:", variantTasks.length);
+console.log("Первая задача:", variantTasks[0].title);
+
+console.log("\n=== Демонстрация варианта завершена ===");
