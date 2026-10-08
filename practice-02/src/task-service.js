@@ -1,0 +1,9 @@
+export function createTask() { throw new Error("Не реализовано: createTask"); }
+export function getTasks() { throw new Error("Не реализовано: getTasks"); }
+export function getSummary() { throw new Error("Не реализовано: getSummary"); }
+export function addTask() { throw new Error("Не реализовано: addTask"); }
+export function updateTask() { throw new Error("Не реализовано: updateTask"); }
+export function deleteTask() { throw new Error("Не реализовано: deleteTask"); }
+export function filterTasksByStatus() { throw new Error("Не реализовано: filterTasksByStatus"); }
+export function filterTasksByPriority() { throw new Error("Не реализовано: filterTasksByPriority"); }
+export function getTaskTitles() { throw new Error("Не реализовано: getTaskTitles"); }
