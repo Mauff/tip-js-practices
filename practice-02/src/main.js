@@ -184,3 +184,22 @@ console.log("Длина исходного variantTasks:", variantTasks.length);
 console.log("Первая задача:", variantTasks[0].title);
 
 console.log("\n=== Демонстрация варианта завершена ===");
+
+import { searchTasks } from './task-extra.js';
+
+// ============================================================
+// Дополнительное задание. Вариант А: поиск по названию
+// ============================================================
+console.log("\n\n=== Дополнительное задание (Вариант А) ===");
+console.log("Тест 1 (обычный запрос, 'функц'):", searchTasks(demoTasks, "функц").map(t => t.title));
+console.log("Тест 2 (другой регистр, 'READ'):", searchTasks(demoTasks, "READ").map(t => t.title));
+console.log("Тест 3 (краевые пробелы, '  модель  '):", searchTasks(demoTasks, "  модель  ").map(t => t.title));
+console.log("Тест 4 (нет совпадений, 'xyz'):", searchTasks(demoTasks, "xyz"));
+console.log("Тест 5 (пустой запрос):", searchTasks(demoTasks, "").length, "задач");
+console.log("Тест 6 (пустой список, []):", searchTasks([], "тест"));
+
+// Проверка неизменности исходных данных
+const copyBefore = JSON.stringify(demoTasks);
+searchTasks(demoTasks, "функц");
+const copyAfter = JSON.stringify(demoTasks);
+console.log("Исходный demoTasks не изменён:", copyBefore === copyAfter);
