@@ -9,5 +9,6 @@
 
 ## Практические работы
 
-- [Практическая работа № 1](./practice-01/README.md)"# tip-js-practice-01" 
+- [Практическая работа № 1](./practice-01/README.md) 
 - [Практическая работа № 2](./practice-02/README.md)
+- [Практическая работа № 3](./practice-03/README.md)
