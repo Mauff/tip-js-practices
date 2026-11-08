@@ -1,181 +1,144 @@
-// Заготовка модуля. throw ниже отмечает отсутствие реализации,
-// а не способ обработки некорректных данных в готовом решении.
-// Для предусмотренных ошибок необходимо возвращать { ok: false, error: "..." }.
-// console.log(), prompt(), document и чтение внешнего состояния здесь не нужны.
 
-// --- Вспомогательные функции для валидации ---
-
-function validateId(id) {
-  if (typeof id !== 'number' || !Number.isSafeInteger(id) || id <= 0) {
-    return { ok: false, error: "id должен быть положительным безопасным целым числом" };
-  }
-  return { ok: true };
+function isValidId(id) {
+  return Number.isSafeInteger(id) && id > 0;
 }
 
-function validateTitle(title) {
-  if (typeof title !== 'string') {
+function normalizeTitle(title) {
+  if (typeof title !== "string") {
     return { ok: false, error: "Название должно быть строкой" };
   }
   const trimmed = title.trim();
   if (trimmed.length < 1 || trimmed.length > 100) {
-    return { ok: false, error: "Название после trim() должно быть длиной от 1 до 100 символов" };
+    return { ok: false, error: "Длина названия должна быть от 1 до 100 символов" };
   }
-  return { ok: true, value: trimmed };
+  return { ok: true, title: trimmed };
 }
 
-function validatePriority(priority) {
-  const validPriorities = ["low", "medium", "high"];
-  if (!validPriorities.includes(priority)) {
+function isValidPriority(priority) {
+  return priority === "low" || priority === "medium" || priority === "high";
+}
+
+export function createTask(id, title, priority = "medium") {
+  if (!isValidId(id)) {
+    return { ok: false, error: "Идентификатор должен быть положительным безопасным целым числом" };
+  }
+
+  const titleResult = normalizeTitle(title);
+  if (!titleResult.ok) {
+    return titleResult;
+  }
+
+  if (!isValidPriority(priority)) {
     return { ok: false, error: "Приоритет должен быть одним из: low, medium, high" };
   }
-  return { ok: true };
-}
 
-// --- 1. createTask ---
-export function createTask(id, title, priority = "medium") {
-  const idCheck = validateId(id);
-  if (!idCheck.ok) return idCheck;
-
-  const titleCheck = validateTitle(title);
-  if (!titleCheck.ok) return titleCheck;
-
-  const priorityCheck = validatePriority(priority);
-  if (!priorityCheck.ok) return priorityCheck;
-
-  const newTask = {
-    id: id,
-    title: titleCheck.value,
-    completed: false,
-    priority: priority
+  return {
+    ok: true,
+    task: {
+      id,
+      title: titleResult.title,
+      completed: false,
+      priority,
+    },
   };
-
-  return { ok: true, task: newTask };
 }
 
-// --- 2. findTaskById ---
 export function findTaskById(tasks, id) {
-  return tasks.find(task => task.id === id);
+  return tasks.find((task) => task.id === id);
 }
 
-// --- 3. getPendingTasks ---
 export function getPendingTasks(tasks) {
-  return tasks.filter(task => task.completed === false);
+  return tasks.filter((task) => task.completed === false);
 }
 
-// --- 4. getTaskTitles ---
 export function getTaskTitles(tasks) {
-  return tasks.map(task => task.title);
+  return tasks.map((task) => task.title);
 }
 
-// --- 5. getTaskStats ---
 export function getTaskStats(tasks) {
   const total = tasks.length;
-  const completed = tasks.filter(t => t.completed).length;
+  const completed = tasks.filter((task) => task.completed === true).length;
   const pending = total - completed;
-  const progress = total === 0 ? 0 : (completed / total) * 100;
-  
+  const progress = total > 0 ? (completed / total) * 100 : 0;
+
   return { total, completed, pending, progress };
 }
 
-// --- 6. addTask ---
 export function addTask(tasks, id, title, priority = "medium") {
-  // Проверяем данные через createTask
-  const creation = createTask(id, title, priority);
-  if (!creation.ok) return creation;
-
-  // Проверяем уникальность id
-  const exists = tasks.some(task => task.id === id);
-  if (exists) {
-    return { ok: false, error: `Задача с id=${id} уже существует` };
+  const existing = findTaskById(tasks, id);
+  if (existing !== undefined) {
+    return { ok: false, error: "Задача с таким идентификатором уже существует" };
   }
 
-  // Возвращаем новый массив с добавленной задачей (без мутации исходного)
-  return { ok: true, tasks: [...tasks, creation.task] };
+  const createResult = createTask(id, title, priority);
+  if (!createResult.ok) {
+    return createResult;
+  }
+
+  return { ok: true, tasks: [...tasks, createResult.task] };
 }
 
-// --- 7. setTaskCompleted ---
 export function setTaskCompleted(tasks, id, completed) {
-  const idCheck = validateId(id);
-  if (!idCheck.ok) return idCheck;
-
-  if (typeof completed !== 'boolean') {
-    return { ok: false, error: "completed должно быть логическим значением (true/false)" };
+  if (typeof completed !== "boolean") {
+    return { ok: false, error: "Признак выполнения должен быть true или false" };
   }
 
-  const exists = tasks.some(task => task.id === id);
-  if (!exists) {
-    return { ok: false, error: `Задача с id=${id} не найдена` };
+  const existing = findTaskById(tasks, id);
+  if (existing === undefined) {
+    return { ok: false, error: "Задача с таким идентификатором не найдена" };
   }
 
-  // Создаём новый массив с обновлённой задачей (без мутации)
-  const updatedTasks = tasks.map(task => 
-    task.id === id ? { ...task, completed: completed } : task
+  const updatedTasks = tasks.map((task) =>
+    task.id === id ? { ...task, completed } : task
   );
 
   return { ok: true, tasks: updatedTasks };
 }
 
-// --- 8. renameTask ---
 export function renameTask(tasks, id, title) {
-  const idCheck = validateId(id);
-  if (!idCheck.ok) return idCheck;
-
-  const titleCheck = validateTitle(title);
-  if (!titleCheck.ok) return titleCheck;
-
-  const exists = tasks.some(task => task.id === id);
-  if (!exists) {
-    return { ok: false, error: `Задача с id=${id} не найдена` };
+  const existing = findTaskById(tasks, id);
+  if (existing === undefined) {
+    return { ok: false, error: "Задача с таким идентификатором не найдена" };
   }
 
-  const updatedTasks = tasks.map(task => 
-    task.id === id ? { ...task, title: titleCheck.value } : task
+  const titleResult = normalizeTitle(title);
+  if (!titleResult.ok) {
+    return titleResult;
+  }
+
+  const updatedTasks = tasks.map((task) =>
+    task.id === id ? { ...task, title: titleResult.title } : task
   );
 
   return { ok: true, tasks: updatedTasks };
 }
 
-// --- 9. removeTask ---
 export function removeTask(tasks, id) {
-  const idCheck = validateId(id);
-  if (!idCheck.ok) return idCheck;
-
-  const exists = tasks.some(task => task.id === id);
-  if (!exists) {
-    return { ok: false, error: `Задача с id=${id} не найдена` };
+  const existing = findTaskById(tasks, id);
+  if (existing === undefined) {
+    return { ok: false, error: "Задача с таким идентификатором не найдена" };
   }
 
-  // Возвращаем новый массив без удалённой задачи (иммутабельно)
-  const updatedTasks = tasks.filter(task => task.id !== id);
+  const updatedTasks = tasks.filter((task) => task.id !== id);
 
   return { ok: true, tasks: updatedTasks };
 }
 
-// --- 10. updateTask ---
 export function updateTask(tasks, id, title, priority) {
-  // 1. Проверка id
-  const idCheck = validateId(id);
-  if (!idCheck.ok) return idCheck;
-
-  // 2. Проверка названия (та же validateTitle, что и в createTask)
-  const titleCheck = validateTitle(title);
-  if (!titleCheck.ok) return titleCheck;
-
-  // 3. Проверка приоритета (та же validatePriority)
-  const priorityCheck = validatePriority(priority);
-  if (!priorityCheck.ok) return priorityCheck;
-
-  // 4. Проверка, что задача существует
-  const exists = tasks.some(task => task.id === id);
-  if (!exists) {
-    return { ok: false, error: `Задача с id=${id} не найдена` };
+  const existing = findTaskById(tasks, id);
+  if (existing === undefined) {
+    return { ok: false, error: "Задача с таким идентификатором не найдена" };
   }
 
-  // 5. Новый массив: только для выбранной задачи создаём новый объект.
-  // id и completed сохраняются как были, меняются только title и priority.
-  const updatedTasks = tasks.map(task =>
+  // createTask проверяет id, название и приоритет; его completed: false не используется.
+  const checked = createTask(id, title, priority);
+  if (!checked.ok) {
+    return checked;
+  }
+
+  const updatedTasks = tasks.map((task) =>
     task.id === id
-      ? { ...task, title: titleCheck.value, priority: priority }
+      ? { ...task, title: checked.task.title, priority: checked.task.priority }
       : task
   );
 

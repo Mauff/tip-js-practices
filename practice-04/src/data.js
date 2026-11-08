@@ -1,5 +1,3 @@
-// Общий контрольный набор. Для своего варианта ниже предусмотрен отдельный массив.
-// Идентификатор задачи не совпадает с её индексом в массиве.
 export const demoTasks = [
   { id: 1, title: "Изучить функции", completed: true, priority: "medium" },
   { id: 4, title: "Подготовить модель задач", completed: false, priority: "high" },
@@ -7,14 +5,14 @@ export const demoTasks = [
   { id: 10, title: "Оформить README", completed: true, priority: "medium" },
 ];
 
-// --- Индивидуальный вариант №5 (Разработка командного прототипа) ---
+
 export const variantNumber = 5;
 
 export const variantTasks = [
-  { id: 11, title: "Подготовка учебного проекта", completed: false, priority: "medium" },
-  { id: 23, title: "Подготовка выступления", completed: false, priority: "high" },
-  { id: 37, title: "Создание сайта-портфолио", completed: false, priority: "low" },
-  { id: 41, title: "Разработка командного прототипа", completed: true, priority: "medium" },
-  { id: 58, title: "Проверка пользовательского интерфейса", completed: true, priority: "low" },
-  { id: 64, title: "Подготовка учебного релиза", completed: true, priority: "high" },
+  { id: 11, title: "Сформировать команду прототипа", completed: true, priority: "high" },
+  { id: 23, title: "Определить архитектуру решения", completed: true, priority: "medium" },
+  { id: 37, title: "Разработать базовый API", completed: true, priority: "high" },
+  { id: 41, title: "Подготовить тестовый стенд", completed: true, priority: "medium" },
+  { id: 58, title: "Реализовать пользовательский сценарий", completed: false, priority: "low" },
+  { id: 64, title: "Подготовить демонстрацию прототипа", completed: false, priority: "low" },
 ];

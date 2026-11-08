@@ -1,6 +1,11 @@
 import { getTaskStats } from "./task-service.js";
 
-// Создание карточки задачи. Обработчики здесь НЕ назначаются.
+const PRIORITY_LABELS = {
+  low: "Низкий",
+  medium: "Средний",
+  high: "Высокий",
+};
+
 export function createTaskElement(task) {
   const li = document.createElement("li");
   li.className = "task-card";
@@ -9,91 +14,82 @@ export function createTaskElement(task) {
     li.classList.add("is-completed");
   }
 
-  // Название — h3.task-title с текстом (textContent, а не innerHTML!)
   const title = document.createElement("h3");
   title.className = "task-title";
   title.textContent = task.title;
-  li.append(title);
 
-  // Статус — span.task-status: «Выполнена» или «В работе»
-  const status = document.createElement("span");
+  const status = document.createElement("p");
   status.className = "task-status";
   status.textContent = task.completed ? "Выполнена" : "В работе";
-  li.append(status);
 
-  // Приоритет — span.task-priority: «Низкий», «Средний», «Высокий»
-  const priorityLabels = { low: "Низкий", medium: "Средний", high: "Высокий" };
-  const priority = document.createElement("span");
+  const priority = document.createElement("p");
   priority.className = "task-priority";
-  priority.textContent = priorityLabels[task.priority] ?? task.priority;
-  li.append(priority);
+  priority.textContent = PRIORITY_LABELS[task.priority] ?? "";
 
-  // Контейнер для кнопок
   const actions = document.createElement("div");
   actions.className = "task-actions";
 
-  // Кнопка статуса
-  const toggleBtn = document.createElement("button");
-  toggleBtn.type = "button";
-  toggleBtn.dataset.action = "toggle";
-  toggleBtn.setAttribute("aria-pressed", String(task.completed));
+  const toggleButton = document.createElement("button");
+  toggleButton.type = "button";
+  toggleButton.dataset.action = "toggle";
+  toggleButton.setAttribute("aria-pressed", task.completed ? "true" : "false");
   const toggleLabel = document.createElement("span");
   toggleLabel.className = "action-label";
   toggleLabel.textContent = "Выполнена";
-  toggleBtn.append(toggleLabel);
-  actions.append(toggleBtn);
-  
-  // Кнопка редактирования
-  const editBtn = document.createElement("button");
-  editBtn.type = "button";
-  editBtn.dataset.action = "edit";
+  toggleButton.append(toggleLabel);
+
+  const editButton = document.createElement("button");
+  editButton.type = "button";
+  editButton.dataset.action = "edit";
   const editLabel = document.createElement("span");
   editLabel.className = "action-label";
   editLabel.textContent = "Изменить";
-  editBtn.append(editLabel);
-  actions.append(editBtn);
+  editButton.append(editLabel);
 
-  // Кнопка удаления
-  const deleteBtn = document.createElement("button");
-  deleteBtn.type = "button";
-  deleteBtn.dataset.action = "delete";
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.dataset.action = "delete";
   const deleteLabel = document.createElement("span");
   deleteLabel.className = "action-label";
   deleteLabel.textContent = "Удалить";
-  deleteBtn.append(deleteLabel);
-  actions.append(deleteBtn);
+  deleteButton.append(deleteLabel);
 
-  li.append(actions);
+  actions.append(toggleButton, editButton, deleteButton);
+  li.append(title, status, priority, actions);
 
   return li;
 }
 
-// Отрисовка списка: заменить дочерние элементы контейнера.
 export function renderTaskList(listElement, tasks) {
-  const cards = tasks.map(createTaskElement);
+  const cards = tasks.map((task) => createTaskElement(task));
   listElement.replaceChildren(...cards);
 }
 
-// Обновление сводки.
 export function renderSummary(summaryElement, tasks, visibleCount) {
+
+  const totalEl = summaryElement.querySelector('[data-stat="total"]');
+  const completedEl = summaryElement.querySelector('[data-stat="completed"]');
+  const pendingEl = summaryElement.querySelector('[data-stat="pending"]');
+  const progressEl = summaryElement.querySelector('[data-stat="progress"]');
+  const visibleEl = summaryElement.querySelector('[data-stat="visible"]');
+
   const stats = getTaskStats(tasks);
-  summaryElement.querySelector("[data-stat='total']").textContent = stats.total;
-  summaryElement.querySelector("[data-stat='completed']").textContent = stats.completed;
-  summaryElement.querySelector("[data-stat='pending']").textContent = stats.pending;
-  summaryElement.querySelector("[data-stat='progress']").textContent = `${stats.progress.toFixed(1)}%`;
-  summaryElement.querySelector("[data-stat='visible']").textContent = visibleCount;
+
+  if (totalEl) totalEl.textContent = String(stats.total);
+  if (completedEl) completedEl.textContent = String(stats.completed);
+  if (pendingEl) pendingEl.textContent = String(stats.pending);
+  if (progressEl) progressEl.textContent = `${stats.progress.toFixed(1)}%`;
+  if (visibleEl) visibleEl.textContent = String(visibleCount);
 }
 
-// Сообщение о пустом состоянии.
 export function renderEmptyState(messageElement, total, visibleCount) {
-  if (total === 0 && visibleCount === 0) {
-    messageElement.textContent = "Список задач пуст.";
-    messageElement.hidden = false;
-  } else if (total > 0 && visibleCount === 0) {
-    messageElement.textContent = "Нет задач по выбранному фильтру.";
-    messageElement.hidden = false;
-  } else {
+  if (visibleCount > 0) {
     messageElement.textContent = "";
     messageElement.hidden = true;
+    return;
   }
+
+  messageElement.textContent =
+    total === 0 ? "Список задач пуст." : "Нет задач по выбранному фильтру.";
+  messageElement.hidden = false;
 }

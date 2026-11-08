@@ -1,68 +1,19 @@
-const PRIORITY_LABELS = Object.freeze({
-  low: "Низкий",
-  medium: "Средний",
-  high: "Высокий",
+export const variantNumber = 5;
+
+const FILTERS_BY_VARIANT = Object.freeze({
+  1: Object.freeze({ completed: false }),
+  2: Object.freeze({ completed: true }),
+  3: Object.freeze({ priority: "high" }),
+  4: Object.freeze({ priority: "medium" }),
+  5: Object.freeze({ categoryId: 1 }),
+  6: Object.freeze({ categoryId: 2 }),
+  7: Object.freeze({ q: "провер" }),
+  8: Object.freeze({ completed: false, priority: "high", categoryId: 2 }),
 });
 
-function createActionButton(action, label) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.dataset.action = action;
-  const span = document.createElement("span");
-  span.className = "action-label";
-  span.textContent = label;
-  button.append(span);
-  return button;
-}
-
-// Пользовательские и серверные строки добавляются только через textContent.
-export function createTaskElement(task, category) {
-  const li = document.createElement("li");
-  li.className = "task-card";
-  li.dataset.taskId = String(task.id);
-  if (task.completed) {
-    li.classList.add("is-completed");
+export function getVariantFilters(number) {
+  if (!Number.isInteger(number) || !FILTERS_BY_VARIANT[number]) {
+    throw new RangeError("Номер варианта должен быть целым числом от 1 до 8.");
   }
-
-  const title = document.createElement("h3");
-  title.className = "task-title";
-  title.textContent = task.title;
-
-  const meta = document.createElement("div");
-  meta.className = "task-meta";
-
-  const status = document.createElement("span");
-  status.className = "task-status";
-  status.textContent = task.completed ? "Выполнена" : "В работе";
-
-  const priority = document.createElement("span");
-  priority.className = "task-priority";
-  priority.textContent = PRIORITY_LABELS[task.priority] ?? "";
-
-  const categoryName = document.createElement("span");
-  categoryName.className = "task-category";
-  categoryName.textContent = category?.name ?? "Без категории";
-
-  meta.append(status, priority, categoryName);
-
-  const actions = document.createElement("div");
-  actions.className = "task-actions";
-
-  const toggleButton = createActionButton("toggle", "Выполнена");
-  toggleButton.setAttribute("aria-pressed", task.completed ? "true" : "false");
-
-  actions.append(
-    toggleButton,
-    createActionButton("edit", "Изменить"),
-    createActionButton("delete", "Удалить"),
-  );
-  li.append(title, meta, actions);
-
-  return li;
-}
-
-export function renderTaskList(list, tasks, categories) {
-  const categoriesById = new Map(categories.map((category) => [category.id, category]));
-  const cards = tasks.map((task) => createTaskElement(task, categoriesById.get(task.categoryId)));
-  list.replaceChildren(...cards);
+  return { ...FILTERS_BY_VARIANT[number] };
 }
